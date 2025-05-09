@@ -8,7 +8,7 @@ app.use("/admin",adminAuth);
 // app.use("/user",userAuth);       also write like this middlewares
 
 app.get("/admin/getData", (req, res)=>{
-    res.send("All Data Sent !!!");
+    res.send("All Data Sent !!!!");
 });
 
 app.get("/user",userAuth, (req, res)=>{
