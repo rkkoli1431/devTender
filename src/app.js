@@ -10,7 +10,7 @@ app.get("/getUserData",(req, res)=>{
         res.send("User Data Sent....")
     }
     catch(err){
-        res.status(500).send("Something went wrong 1 !!!!");
+        res.status(500).send("Something went wrong 1 !!!!!");
     }
 });
 
