@@ -38,7 +38,7 @@ const useSchema = mongoose.Schema({
         maxLength : 10,
         validator(value){
             if(!validator.isStrongPassword(value)){
-                throw new Error("Enter a Strong Password :"+value); 
+                throw new Error("Enter the Strong Password :"+value); 
             }
         }
     },
