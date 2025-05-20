@@ -25,8 +25,8 @@ const useSchema = mongoose.Schema({
         trim: true,
         validator(value)
         {
-            if(!validator.isEmail((value))){
-                throw new Error("Invalid Email Address : "+value);
+            if(!validator.isEmail(value)){
+                throw new Error("Invalid Email Address : " +value);
             }
         }
     },
@@ -38,7 +38,7 @@ const useSchema = mongoose.Schema({
         maxLength : 10,
         validator(value){
             if(!validator.isStrongPassword(value)){
-                throw new Error("Enter the Strong Password :"+value); 
+                throw new Error("Enter the Strong Password :" +value); 
             }
         }
     },

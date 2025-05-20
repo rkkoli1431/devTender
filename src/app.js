@@ -1,6 +1,8 @@
 const express = require("express");
 const User = require("./models/user");
 const connectDB = require("./config/database");
+const {validateSignUpDate} = require("./utils/validations");
+const bcrypt = require("bcrypt");
 const app = express();
 app.use(express.json());
 
@@ -35,16 +37,23 @@ app.get("/feed",async(req,res)=>{
 
 // Post the user data on database all 
 app.post("/signup",async(req, res)=>{
-   
+   try{
+    // Validation of data 
+    validateSignUpDate(req);
+
+    const {password} = req.body;
+    const passwordHash = await bcrypt.hash(password,10)
+    console.log(passwordHash);
+    // Encrypt the password
     // Creating a new instance of the User Model 
     // console.log(req.body);
     const userObj = new User (req.body);
-    const user = new User(userObj);
-    try{
+    const user = new User(console.log(user));
+   
        await user.save();
        res.send("Data Saved Successfully ....");
     }catch(err){
-        res.status(400).send("Something went wrong ..."+err);
+        res.status(400).send("ERROR ... "+err.message);
     }
     
 });
@@ -64,8 +73,8 @@ app.delete("/user",async(req, res)=>{
 });
 
 // Update the User information on database 
-app.patch("/user:/userId",async(req, res)=>{
-    const userId = req.params?.userId;
+app.patch("/user",async(req, res)=>{
+    const userId = req.body.userId;
     const data = req.body;
     try{
 
@@ -78,9 +87,10 @@ app.patch("/user:/userId",async(req, res)=>{
         if(data?.skills.length> 10){
             throw new Error("Skills cannot be more than 10");
         }
-        // const user = await User.findByIdAndUpdate({_id: userId },data);
+        // const user = await User.findByIdAndUpdate({_id: userId },data,{
+        //     runValidators: true,
+        // });
         const user = await User.findByIdAndUpdate(userId, data);
-        runValidators: true,
         res.send("User Update Successfully....");
     }
     catch(err){
