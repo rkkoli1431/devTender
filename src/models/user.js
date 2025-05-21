@@ -59,6 +59,7 @@ const useSchema = mongoose.Schema({
     },
     photoUrl: {
         type: String,
+        default: "Dummy Photo Url",
     },
     about:{
         type: [String],
@@ -66,6 +67,7 @@ const useSchema = mongoose.Schema({
     },
     skills:{
         type: [String],
+        required: true,
     }
 },{ timestamps: true });
 
