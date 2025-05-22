@@ -2,9 +2,12 @@ const express = require("express");
 const User = require("./models/user");
 const connectDB = require("./config/database");
 const {validateSignUpData} = require("./utils/validations");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 // get user by email
 app.get("/user",async(req,res)=>{
@@ -79,6 +82,11 @@ app.post("/login",async(req, res)=>{
         console.log(isPasswordValid); // This is check the password on login time console print 
 
         if(isPasswordValid){
+
+            const token = await jwt.sign({_id: user._id}, "Dev@Tinder$18");
+            console.log(token);
+            // Add the token to cookie and send the response back to the server 
+            res.cookie("token", token);
             res.send("User Login Successfully ...");
         }
         else{
@@ -87,7 +95,37 @@ app.post("/login",async(req, res)=>{
     }catch(err){
         res.status(400).send("ERROR :"+err.message);
     }
-})
+});
+
+// Profile API To Get The Data
+
+app.get("/profile",async(req, res )=>{
+    try{
+    const cookies = req.cookies;
+    
+    const {token} = cookies;
+    console.log(token);
+    if(!token)
+    {
+        throw new Error("Invalid Token");
+    }
+    // Validate the logi her
+
+    const decodedMassage = await jwt.verify(token, "Dev@Tinder$18");
+    
+    const {_id} = decodedMassage;
+    console.log("Logged In User :"+ _id);
+
+    const user = await User.findByIdOne(_id);
+    if(!user){
+        throw new Error("User does not exist ");
+    }
+
+    res.send(user);
+    }catch(err){
+        res.status(400).send("ERROR :"+err.message);
+    }
+});
 
 //  delete the user from database 
 app.delete("/user",async(req, res)=>{
