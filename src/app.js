@@ -1,7 +1,7 @@
 const express = require("express");
 const User = require("./models/user");
 const connectDB = require("./config/database");
-const {validateSignUpDate} = require("./utils/validations");
+const {validateSignUpData} = require("./utils/validations");
 const bcrypt = require("bcrypt");
 const app = express();
 app.use(express.json());
@@ -39,16 +39,24 @@ app.get("/feed",async(req,res)=>{
 app.post("/signup",async(req, res)=>{
    try{
     // Validation of data 
-    validateSignUpDate(req);
+    validateSignUpData(req);
+
+    const {firstName, lastName, emailId, } = req.body;
 
     const {password} = req.body;
     const passwordHash = await bcrypt.hash(password,10)
-    console.log(passwordHash);
+   
     // Encrypt the password
     // Creating a new instance of the User Model 
     // console.log(req.body);
-    const userObj = new User (req.body);
-    const user = new User(console.log(user));
+    const user = new User ({
+        firstName,
+        lastName,
+        emailId,
+        password: passwordHash,
+    });
+    //  console.log(passwordHash);  check the password is come into the database 
+    // const user = new User(console.log(user));
    
        await user.save();
        res.send("Data Saved Successfully ....");
@@ -57,6 +65,29 @@ app.post("/signup",async(req, res)=>{
     }
     
 });
+
+// Login User API
+
+app.post("/login",async(req, res)=>{
+    try{
+        const {emailId, password} = req.body;
+        const user = await User.findOne({emailId: emailId});
+        if(!user){
+            throw new Error("Invalid Credentials");
+        }
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        console.log(isPasswordValid); // This is check the password on login time console print 
+
+        if(isPasswordValid){
+            res.send("User Login Successfully ...");
+        }
+        else{
+            throw new Error("Invalid Password");
+        }
+    }catch(err){
+        res.status(400).send("ERROR :"+err.message);
+    }
+})
 
 //  delete the user from database 
 app.delete("/user",async(req, res)=>{
@@ -97,7 +128,6 @@ app.patch("/user",async(req, res)=>{
         res.send("User Updated Fail ....."+err);
     }
 });
-
 
 
 connectDB().then(()=>{
