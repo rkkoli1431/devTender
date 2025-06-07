@@ -3,10 +3,10 @@ const User = require("./models/user");
 const connectDB = require("./config/database");
 const {validateSignUpData} = require("./utils/validations");
 const cookieParser = require("cookie-parser");
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const {userAuth} = require("./middlewares/auth");
 const app = express();
-const {userAuth} = require("./middlewares/auth")
 app.use(express.json());
 app.use(cookieParser());
 
@@ -84,10 +84,10 @@ app.post("/login",async(req, res)=>{
 
         if(isPasswordValid){
 
-            const token = await jwt.sign({_id: user._id}, "Dev@Tinder$18");
-            console.log(token);
+            const token = await jwt.sign({_id: user._id}, "Dev@Tinder$18",{ expiresIn: '0d' });
             // Add the token to cookie and send the response back to the server 
-            res.cookie("token", token);
+            res.cookie("token", token,{expires: new Date(Date.now() + 8 * 3600000)} // cookie will be removed after 8 hours
+);
             res.send("User Login Successfully ...");
         }
         else{
@@ -100,26 +100,12 @@ app.post("/login",async(req, res)=>{
 
 // Profile API To Get The Data
 
-app.get("/profile", async(req, res )=>{  
-    try{
-    const cookies = req.cookies;
-        
-    const {token} = cookies;
-    if(!token){
-        throw new Error("Token is not valid !!");
-    }
-
-    const decodedObj = await jwt.verify(token, "Dev@Tinder$18")
-    
-    const {_id} = decodedObj;
-    
-    const user = await User.findById(_id );
-    if(!user){
-        throw new Error("User not found");
-    }
-    res.send(user);
+app.get("/profile", userAuth, async (req, res ) => { 
+    try{ 
+        const user = req.user;
+        res.send(user);
 }catch(err){
-    res.status(400).send("ERROR: "+ err.message);
+    res.status(400).send("ERROR : "+err.message);
 }
 });
 
