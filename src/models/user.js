@@ -6,7 +6,7 @@ const useSchema = mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        minLenght: 5,
+        minLenght: 4,
         maxLength: 20,
     },
 
@@ -69,6 +69,7 @@ const useSchema = mongoose.Schema({
         required: true,
     }
 },{ timestamps: true });
+
 
 const User = mongoose.model("User", useSchema);
 

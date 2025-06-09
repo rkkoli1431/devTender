@@ -1,122 +1,17 @@
 const express = require("express");
-const User = require("./models/user");
 const connectDB = require("./config/database");
-const {validateSignUpData} = require("./utils/validations");
 const cookieParser = require("cookie-parser");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const {userAuth} = require("./middlewares/auth");
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-// get user by email
-app.get("/user",async(req,res)=>{
-    const userEmail = req.body.emailId;
-    try{
-       const user = await User.findOne({emailId: userEmail});
-       if(!user){
-        res.status(400).send("User not found");
-       } else{
-        res.send(user);
-       }
-    }
-    catch(err)
-    {
-        res.send("Something went wrong ....");
-    }
-});
+const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
+const requestRouter = require("./routes/request");
 
-//Feed API - GET /feed - get all the users from the database
-
-app.get("/feed",async(req,res)=>{
-    try{
-        const users = await User.find({});
-        res.send(users);
-    }
-    catch(err){
-        res.status(400).send("Something went wrong ....");
-    }
-});
-
-// Post the user data on database all 
-app.post("/signup",async(req, res)=>{
-   try{
-    // Validation of data 
-    validateSignUpData(req);
-
-    const {firstName, lastName, emailId, } = req.body;
-
-    const {password} = req.body;
-    const passwordHash = await bcrypt.hash(password,10)
-   
-    // Encrypt the password
-    // Creating a new instance of the User Model 
-    // console.log(req.body);
-    const user = new User ({
-        firstName,
-        lastName,
-        emailId,
-        password: passwordHash,
-    });
-    //  console.log(passwordHash);  check the password is come into the database 
-    // const user = new User(console.log(user));
-   
-       await user.save();
-       res.send("Data Saved Successfully ....");
-    }catch(err){
-        res.status(400).send("ERROR ... "+err.message);
-    }
-    
-});
-
-// Login User API
-
-app.post("/login",async(req, res)=>{
-    try{
-        const {emailId, password} = req.body;
-        const user = await User.findOne({emailId: emailId});
-        if(!user){
-            throw new Error("Invalid Credentials");
-        }
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-         // This is check the password on login time console print 
-
-        if(isPasswordValid){
-
-            const token = await jwt.sign({_id: user._id}, "Dev@Tinder$18",{ expiresIn: '0d' });
-            // Add the token to cookie and send the response back to the server 
-            res.cookie("token", token,{expires: new Date(Date.now() + 8 * 3600000)} // cookie will be removed after 8 hours
-);
-            res.send("User Login Successfully ...");
-        }
-        else{
-            throw new Error("Invalid Password");
-        }
-    }catch(err){
-        res.status(400).send("ERROR :"+err.message);
-    }
-});
-
-// Profile API To Get The Data
-
-app.get("/profile", userAuth, async (req, res ) => { 
-    try{ 
-        const user = req.user;
-        res.send(user);
-}catch(err){
-    res.status(400).send("ERROR : "+err.message);
-}
-});
-
-
-app.post("/sendConnectionRequest",userAuth, async (req, res)=>{
-    const user = req.user;
-    console.log("Connection Request")
-
-    res.send(user.firstName +" Connection Request Sent !!");
-})
-
+app.use("/",authRouter);
+app.use("/",profileRouter);
+app.use("/",requestRouter);
 
 connectDB().then(()=>{
     console.log("Database connection Successfully ...");
