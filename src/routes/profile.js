@@ -22,13 +22,19 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
             throw new Error("Invalid Edit Request");
         }
         const loggedInUser = req.user;
-        console.log(loggedInUser);
+        // console.log(loggedInUser);
 
         Object.keys(req.body).forEach((key) => (loggedInUser[key] = req.body[key]));
+        await loggedInUser.save();
 
-        console.log(loggedInUser);
+        // console.log(loggedInUser);
 
-        res.send(`${loggedInUser.firstName},Your profile updated successfull !!`);
+        // res.send(`${loggedInUser.firstName},Your profile updated successfull !!`);
+        // This is the good way to sending the response
+        res.json({
+            message: `${loggedInUser.firstName},Your profile updated successfull !!`,
+            data: loggedInUser,
+        })
     } catch(err){
         res.status(400).send("ERROR : ", +err.message);
     }
