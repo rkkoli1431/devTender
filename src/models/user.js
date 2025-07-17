@@ -70,6 +70,8 @@ const useSchema = mongoose.Schema({
     }
 },{ timestamps: true });
 
+useSchema.index({firstName: 1, lastName: 1});
+
 
 const User = mongoose.model("User", useSchema);
 
