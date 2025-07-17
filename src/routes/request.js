@@ -55,7 +55,7 @@ requestRouter.post("/request/send/:status/:toUserId",userAuth, async (req, res)=
     // res.send(user.firstName +" Connection Request Sent !!");
 });
 
-requestRouter.post("/request/review/status/:requestId",userAuth, async (req, res) => {
+requestRouter.post("/request/review/:status/:requestId",userAuth, async (req, res) => {
     try{
         const loggedInuser = req.user;
         const {status, requestId} = req.params;
