@@ -57,7 +57,7 @@ requestRouter.post("/request/send/:status/:toUserId",userAuth, async (req, res)=
 
 requestRouter.post("/request/review/:status/:requestId",userAuth, async (req, res) => {
     try{
-        const loggedInuser = req.user;
+        const loggedInUser = req.user;
         const {status, requestId} = req.params;
 
         const allowedStatus = ["accepeted", "rejected"];
@@ -68,9 +68,10 @@ requestRouter.post("/request/review/:status/:requestId",userAuth, async (req, re
 
         const connectionRequest = await ConnectionRequest.findOne({
             _id: requestId,
-            toUserId: loggedInuser._id,
+            toUserId: loggedInUser._id,
             status: "interested",
         });
+        console.log(connectionRequest);
 
         if(!connectionRequest){
             return res.status(404).json({massage: "Connection Request Not Found"});
