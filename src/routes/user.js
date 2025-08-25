@@ -3,8 +3,6 @@ const userRouter = express.Router();
 const {userAuth} = require("../middlewares/auth");
 const ConnectionRequest = require("../models/connectionRequest");
 
-const USER_SAFE_DATA = "firstName lastName";
-
 userRouter.get("/user/requests/received",userAuth, async(req, res)=>{
     try{
         const loggedInUser = req.user;
@@ -16,7 +14,7 @@ userRouter.get("/user/requests/received",userAuth, async(req, res)=>{
         res.json({
             message: "Data fetch successfully",
             data: connectionRequest,
-        })
+        });
     }catch(err){
         res.status(400).send("ERROR :" +err.message);
     }
@@ -24,20 +22,19 @@ userRouter.get("/user/requests/received",userAuth, async(req, res)=>{
 
 userRouter.get("/user/connections", userAuth, async (req, res)=>{
     try{
-          
         const loggedInUser = req.user;
-        console.log(loggedInUser);
+
         const connectionRequest = await ConnectionRequest.find({
-            
-        $or: [
-            { toUserId: loggedInUser._id, status: "accepted" },
-            { fromUserId: loggedInUser._id, status: "accepted" },
-        ],
-        
-    }).populate("fromUserId", USER_SAFE_DATA );
-        res.json({ data: connectionRequest });
+            $or: [
+                {toUserId: loggedInUser._id, status: "accepeted" },
+                {fromUseId: loggedInUser._id, status: "accepeted" },
+            ],
+        }).populate("fromUserId", ["firstName", "lastName"]);
+
+        const data = connectionRequest.map((row) => row.fromUserId);
+        res.json({data});
     }catch(err){
-        res.status(400).send({ message: err.message });  
+        res.status(400).send({massage: err.massage});
     }
 });
 
