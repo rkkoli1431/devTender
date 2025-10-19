@@ -29,8 +29,14 @@ authRouter.post("/signup",async(req, res)=>{
     //  console.log(passwordHash);  check the password is come into the database 
     // const user = new User(console.log(user));
    
-       await user.save();
-       res.send("Data Saved Successfully ....");
+       const savedUser = await user.save();
+
+       const token = await jwt.sign({_id: user._id}, "Dev@Tinder$18",{ expiresIn: '1d' });
+            // Add the token to cookie and send the response back to the server 
+        res.cookie("token", token,{expires: new Date(Date.now() + 8 * 3600000)} // cookie will be removed after 8 hours
+);
+       
+       res.json({ message: "Data Saved Successfully ....", data: savedUser});
     }catch(err){
         res.status(400).send("ERROR ... "+err.message);
     }
@@ -54,7 +60,7 @@ authRouter.post("/login",async(req, res)=>{
             // Add the token to cookie and send the response back to the server 
             res.cookie("token", token,{expires: new Date(Date.now() + 8 * 3600000)} // cookie will be removed after 8 hours
 );
-            res.send("User Login Successfully ...");
+            res.send(user);
         }
         else{
             throw new Error("Invalid Password");

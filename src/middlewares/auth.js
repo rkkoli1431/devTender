@@ -6,7 +6,8 @@ const userAuth = async (req, res, next) => {
         const { token } = req.cookies; // This works because cookie-parser is used in app.js
 
         if (!token) {
-            throw new Error("Token is not valid");
+            // throw new Error("Token is not valid");
+            return res.status(401).send("Please Login !");
         }
 
         const decoded = jwt.verify(token, "Dev@Tinder$18");
